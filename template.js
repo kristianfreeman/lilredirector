@@ -77,8 +77,9 @@ export default ({ redirects }) => () => `
           <th>visits*</th>
           <th>actions</th>
         </tr>
-        ${redirects.map(
-          redirect => `
+        ${redirects
+          .map(
+            redirect => `
           <tr>
             <td>${redirect.path}</td>
             <td>${redirect.redirect}</td>
@@ -89,7 +90,8 @@ export default ({ redirects }) => () => `
             </td>
           </tr>
         `,
-        )}
+          )
+          .join('\n')}
       </table>
       <p>* visits are an estimate. distributed systems!</p>
       `
