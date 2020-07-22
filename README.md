@@ -2,6 +2,8 @@
 
 a simple redirector engine for cloudflare workers
 
+![demo](./.github/demo.png)
+
 ## installation
 
 1. install the package
