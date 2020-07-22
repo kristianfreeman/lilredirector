@@ -27,7 +27,7 @@ kv_namespaces = [{ binding = "REDIRECTS", id = "$id", preview_id = "$id" }]
 ## configure
 
 ```javascript
-import handler from 'lilredirector'
+import redirector from 'lilredirector'
 
 addEventListener('fetch', event => event.respondWith(handler(event)))
 
