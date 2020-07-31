@@ -1,6 +1,6 @@
 {
   "name": "lilredirector",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "redirector engine for cloudflare workers",
   "main": "index.js",
   "scripts": {
