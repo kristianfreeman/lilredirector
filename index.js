@@ -79,9 +79,15 @@ const renderHtml = page =>
     headers: { 'Content-type': 'text/html' },
   })
 
-export default async event => {
+const removeTrailingSlashesFromUrl = url =>
+  (url.pathname = url.pathname.slice(0, -1))
+
+const defaults = { removeTrailingSlashes: true }
+
+export default async (event, options = {}) => {
+  const config = Object.assign(defaults, options)
   let error, response
-  const url = new URL(event.request.url)
+  let url = new URL(event.request.url)
   try {
     switch (url.pathname) {
       case '/_redirects':
@@ -109,6 +115,7 @@ export default async event => {
         response = Response.redirect(url)
         break
       default:
+        if (config.removeTrailingSlashes) removeTrailingSlashesFromUrl(url)
         const redirect = await getRedirect(url, { event })
         if (redirect) {
           response = Response.redirect(redirect)
