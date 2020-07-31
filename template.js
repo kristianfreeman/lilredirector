@@ -1,14 +1,29 @@
 const style = `
-  body {
-    background: #fff;
-    color: #1d2d35;
+  html {
+    -webkit-font-smoothing: antialiased;
     font-family: "Helvetica Neue", helvetica, "Apple Color Emoji", arial, sans-serif;
+    color: #1d2d35;
+    background: #fff;
+  }
+
+  body {
     margin: 0 auto;
     max-width: 40rem;
   }
 
   section {
     margin: 2rem 0;
+    border-top: 1px solid #767676;
+  }
+
+  h1, h2 {
+    margin-top: 1em;
+    margin-bottom: 0;
+  }
+
+  table {
+    width: 100%;
+    margin: 1em 0;
   }
 
   div {
@@ -19,16 +34,17 @@ const style = `
     font-weight: bold;
   }
 
-  table {
-    width: 100%;
-  }
-
   td {
-    padding: 0.5rem 0;
+    padding: .5rem 0;
   }
 
   th {
     text-align: left;
+  }
+
+  tr > *:last-child,
+  tr > *:nth-last-child(2) {
+    text-align: right;
   }
 `
 
