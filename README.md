@@ -44,6 +44,20 @@ async function handler(event) {
 }
 ```
 
+### trailing slashes
+
+by default, lilredirector will match and redirect URLs _without_ trailing slashes. for instance, if you have a redirect set up for `/about`, visiting `/about/` will search for a redirect for `/about` in the lilredirector database, and redirect accordingly. this feature can be disabled by passing a configuration object into the `redirector` function:
+
+```javascript
+async function handler(event) {
+  const { response, error } = await redirector(
+    event,
+    { removeTrailingSlashes: false }
+  )
+  if (response) return response
+}
+```
+
 ## how it works
 
 #### handlers
