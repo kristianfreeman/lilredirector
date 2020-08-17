@@ -28,7 +28,12 @@ const gatherRedirects = async () => {
   return redirects
 }
 
-const updateRedirect = async ({ path, redirect }) => {
+const updateRedirect = async ({
+  path: unsanitizedPath,
+  redirect: unsanitizedRedirect,
+}) => {
+  const path = unsanitizedPath.trim()
+  const redirect = unsanitizedRedirect.trim()
   try {
     await REDIRECTS.put(
       `redirects:${path}`,
