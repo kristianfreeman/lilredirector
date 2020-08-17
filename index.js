@@ -1,3 +1,4 @@
+import CSV from 'papaparse'
 import template from './template'
 
 const gatherRedirects = async () => {
@@ -84,6 +85,11 @@ const removeTrailingSlashesFromUrl = url =>
 
 const defaults = { removeTrailingSlashes: true }
 
+const parseBulk = bulk => {
+  const string = decodeURIComponent(bulk)
+  return CSV.parse(string)
+}
+
 export default async (event, options = {}) => {
   const config = Object.assign(defaults, options)
   let error, response
@@ -101,13 +107,26 @@ export default async (event, options = {}) => {
         response = new Response(null, { status: 204 })
         break
       case '/_redirects/update':
-        const redirectObj = {
-          path: url.searchParams.get('path'),
-          redirect: url.searchParams.get('redirect'),
+        const bulk = url.searchParams.get('bulk')
+        let redirectObjs = []
+        if (bulk) {
+          const { data } = parseBulk(bulk)
+          data.forEach(([path, redirect]) => {
+            redirectObjs.push({
+              path,
+              redirect,
+            })
+          })
+        } else {
+          redirectObjs.push({
+            path: url.searchParams.get('path'),
+            redirect: url.searchParams.get('redirect'),
+          })
         }
+
         url.search = ''
-        const updated = await updateRedirect(redirectObj)
-        if (!updated) {
+        const updated = await Promise.all(redirectObjs.map(updateRedirect))
+        if (updated.some(u => u === false)) {
           url.searchParams.set('error', true)
         }
 

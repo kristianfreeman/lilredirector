@@ -65,15 +65,24 @@ export default ({ redirects }) => () => `
       <form action="/_redirects/update">
         <div>
           <label for="path">path</label><br /><br />
-          <input required="true" type="text" id="path" name="path" placeholder="/about"></input>
+          <input type="text" id="path" name="path" placeholder="/about"></input>
           <p><small>path must be local (e.g. "/about") and should not have any trailing slashes</small></p>
         </div>
 
         <div>
           <label for="redirect">redirect</label><br /><br />
-          <input required="true" type="text" id="redirect" name="redirect" placeholder="/about-us"></input>
+          <input type="text" id="redirect" name="redirect" placeholder="/about-us"></input>
           <p><small>redirects can be relative (e.g. "/about-us") or absolute ("https://twitter.com/cloudflaredev")</small></p>
         </div>
+
+        <details>
+          <summary>add multiple redirects</summary>
+          <div>
+            <label for="bulk">bulk redirects</label><br /><br />
+            <textarea cols=64 rows=8 id="bulk" name="bulk" placeholder="/twitter,https://twitter.com/signalnerve"></textarea>
+            <p><small>redirects should be in csv format, e.g. "path,redirect_url"</small></p>
+          </div>
+        </details>
 
         <div>
           <button type="submit">create redirect</button>
@@ -122,6 +131,10 @@ export default ({ redirects }) => () => `
     )}</script>
 
     <script>
+      const pathInput = document.querySelector("input#path")
+      const redirectInput = document.querySelector("input#redirect")
+      const bulkInput = document.querySelector('textarea#bulk')
+
       const redirects = JSON.parse(document.querySelector("script#redirects_data").innerText)
 
       const confirmDeletion = async redirectId => {
@@ -138,7 +151,6 @@ export default ({ redirects }) => () => `
         const button = evt.target
         const redirectId = button.dataset.target
         const redirect = redirects.find(({ path }) => path === redirectId)
-        console.log(redirect)
         if (window.confirm("are you sure you want to delete the redirect for " + redirect.path + "?")) {
           confirmDeletion(redirectId)
         }
@@ -149,12 +161,51 @@ export default ({ redirects }) => () => `
         const redirectId = button.dataset.target
         const redirect = redirects.find(({ path }) => path === redirectId)
 
-        document.querySelector("input#path").value = redirect.path
-        document.querySelector("input#redirect").value = redirect.redirect
+        pathInput.value = redirect.path
+        redirectInput.value = redirect.redirect
       }
 
       document.querySelectorAll('button#edit').forEach(button => button.addEventListener('click', editRedirect))
       document.querySelectorAll('button#delete').forEach(button => button.addEventListener('click', deleteRedirect))
+
+      const validateForm = event => {
+        let valid = true
+        pathInput.required = false
+        redirectInput.required = false
+
+        if (pathInput.value.length || redirectInput.value.length) {
+          if (bulkInput.value.length) {
+            alert("Can't fill out bulk field and individual redirect")
+            valid = false
+          }
+
+          if (!pathInput.value.length) {
+            pathInput.required = true
+            valid = false
+          }
+
+          if (!redirectInput.value.length) {
+            redirectInput.required = true
+            valid = false
+          }
+        }
+
+        if (bulkInput.value.length) {
+          if (pathInput.value.length || redirectInput.value.length) {
+            alert("Can't fill out bulk field and individual redirect")
+            valid = false
+          }
+        }
+
+        if (!pathInput.value.length && !redirectInput.value.length && !bulkInput.value.length) {
+          alert("No redirects provided")
+          valid = false
+        }
+
+        if (!valid) event.preventDefault()
+      }
+
+      document.querySelector("form").addEventListener('submit', validateForm)
     </script>
   </body>
 </html>
