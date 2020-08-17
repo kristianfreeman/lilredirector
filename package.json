@@ -11,5 +11,8 @@
   "license": "MIT",
   "devDependencies": {
     "prettier": "^1.19.1"
+  },
+  "dependencies": {
+    "papaparse": "^5.2.0"
   }
 }

@@ -8,7 +8,7 @@ const style = `
 
   body {
     margin: 0 auto;
-    max-width: 40rem;
+    max-width: 64rem;
   }
 
   section {
@@ -46,6 +46,17 @@ const style = `
   tr > *:nth-last-child(2) {
     text-align: right;
   }
+
+  #flash {
+    background: #FFF5F5;
+    color: #e53e3e;
+    font-weight: 600;
+    padding: 1rem;
+  }
+
+  .error {
+    background: #FFF5F5;
+  }
 `
 
 export default ({ redirects }) => () => `
@@ -60,20 +71,31 @@ export default ({ redirects }) => () => `
     <h1>lil redirector</h1>
     <p>helping you with ${redirects.length} redirects</p>
 
+    <p id="flash"></p>
+
     <section>
       <h2>create a redirect</h2>
       <form action="/_redirects/update">
         <div>
           <label for="path">path</label><br /><br />
-          <input required="true" type="text" id="path" name="path" placeholder="/about"></input>
+          <input type="text" id="path" name="path" placeholder="/about"></input>
           <p><small>path must be local (e.g. "/about") and should not have any trailing slashes</small></p>
         </div>
 
         <div>
           <label for="redirect">redirect</label><br /><br />
-          <input required="true" type="text" id="redirect" name="redirect" placeholder="/about-us"></input>
+          <input type="text" id="redirect" name="redirect" placeholder="/about-us"></input>
           <p><small>redirects can be relative (e.g. "/about-us") or absolute ("https://twitter.com/cloudflaredev")</small></p>
         </div>
+
+        <details>
+          <summary>add multiple redirects</summary>
+          <div>
+            <label for="bulk">bulk redirects</label><br /><br />
+            <textarea cols=64 rows=8 id="bulk" name="bulk" placeholder="/twitter,https://twitter.com/signalnerve"></textarea>
+            <p><small>redirects should be in csv format, e.g. "path,redirect_url"</small></p>
+          </div>
+        </details>
 
         <div>
           <button type="submit">create redirect</button>
@@ -115,14 +137,30 @@ export default ({ redirects }) => () => `
       }
     </section>
 
-    <code>version 0.0.1</code>
+    <code>version 0.2.0</code>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
       redirects,
     )}</script>
 
     <script>
+      const url = new URL(document.location)
+      const flash = document.querySelector("#flash")
+      const pathInput = document.querySelector("input#path")
+      const redirectInput = document.querySelector("input#redirect")
+      const bulkInput = document.querySelector('textarea#bulk')
+
       const redirects = JSON.parse(document.querySelector("script#redirects_data").innerText)
+
+      flash.hidden = true
+      const parseErrors = () => {
+        const errorMsg = url.searchParams.get("error")
+        if (errorMsg && errorMsg.length) {
+          flash.innerHTML = errorMsg
+          flash.hidden = false
+        }
+      }
+      parseErrors()
 
       const confirmDeletion = async redirectId => {
         let url = new URL(window.location)
@@ -138,7 +176,6 @@ export default ({ redirects }) => () => `
         const button = evt.target
         const redirectId = button.dataset.target
         const redirect = redirects.find(({ path }) => path === redirectId)
-        console.log(redirect)
         if (window.confirm("are you sure you want to delete the redirect for " + redirect.path + "?")) {
           confirmDeletion(redirectId)
         }
@@ -149,12 +186,45 @@ export default ({ redirects }) => () => `
         const redirectId = button.dataset.target
         const redirect = redirects.find(({ path }) => path === redirectId)
 
-        document.querySelector("input#path").value = redirect.path
-        document.querySelector("input#redirect").value = redirect.redirect
+        pathInput.value = redirect.path
+        redirectInput.value = redirect.redirect
       }
 
       document.querySelectorAll('button#edit').forEach(button => button.addEventListener('click', editRedirect))
       document.querySelectorAll('button#delete').forEach(button => button.addEventListener('click', deleteRedirect))
+
+      const validateForm = event => {
+        let valid = true
+
+        if (pathInput.value.length || redirectInput.value.length) {
+          if (bulkInput.value.length) {
+            alert("Can't fill out bulk field and individual redirect")
+            valid = false
+          }
+
+          if (!pathInput.value.length) {
+            valid = false
+            pathInput.classList.add("error")
+          }
+
+          if (!redirectInput.value.length) {
+            valid = false
+            redirectInput.classList.add("error")
+          }
+        }
+
+        if (!pathInput.value.length && !redirectInput.value.length && !bulkInput.value.length) {
+          flash.innerText = "No redirects provided"
+          flash.hidden = false
+          valid = false
+        }
+
+        if (!valid) {
+          event.preventDefault()
+        }
+      }
+
+      document.querySelector("form").addEventListener('submit', validateForm)
     </script>
   </body>
 </html>
