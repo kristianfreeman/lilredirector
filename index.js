@@ -55,6 +55,16 @@ const deleteRedirect = async ({ path }) => {
   return true
 }
 
+const redirectToUrl = (redirect, url) => {
+  if (redirect.startsWith('/')) {
+    let newUrl = new URL(url)
+    newUrl.pathname = redirect
+    return newUrl
+  } else {
+    return redirect
+  }
+}
+
 const getRedirect = async (url, { event }) => {
   const key = `redirects:${url.pathname}`
   const result = JSON.parse(await REDIRECTS.get(key))
@@ -70,13 +80,7 @@ const getRedirect = async (url, { event }) => {
       ),
     )
     const redirect = result.redirect
-    if (redirect.startsWith('/')) {
-      let newUrl = new URL(url)
-      newUrl.pathname = redirect
-      return newUrl
-    } else {
-      return redirect
-    }
+    return redirectToUrl(redirect, url)
   }
 }
 
@@ -88,7 +92,11 @@ const renderHtml = page =>
 const removeTrailingSlashesFromUrl = url =>
   (url.pathname = url.pathname.slice(0, -1))
 
-const defaults = { removeTrailingSlashes: true }
+const defaults = {
+  cancelBulkAddOnError: false,
+  removeTrailingSlashes: true,
+  validateRedirects: true,
+}
 
 const parseBulk = bulk => {
   const string = decodeURIComponent(bulk)
@@ -112,27 +120,70 @@ export default async (event, options = {}) => {
         response = new Response(null, { status: 204 })
         break
       case '/_redirects/update':
+        let updateError = false
+
         const bulk = url.searchParams.get('bulk')
         let redirectObjs = []
         if (bulk) {
+          let errors = []
           const { data } = parseBulk(bulk)
-          data.forEach(([path, redirect]) => {
-            redirectObjs.push({
-              path,
-              redirect,
-            })
-          })
+          await Promise.all(
+            data.map(async ([path, redirect]) => {
+              if (!path || redirect) return
+              if (config.validateRedirects) {
+                const fetchUrl = redirectToUrl(redirect, url)
+                const resp = await fetch(fetchUrl)
+                if (resp.status > 399) {
+                  if (config.cancelBulkAddOnError) updateError = true
+                  errors.push(
+                    `Invalid URL provided or request to URL failed, unable to save: ${redirect}`,
+                  )
+                  return
+                }
+              }
+              redirectObjs.push({
+                path,
+                redirect,
+              })
+            }),
+          )
+
+          if (errors.length) {
+            url.searchParams.set('error', errors.join('<br>'))
+          }
         } else {
-          redirectObjs.push({
-            path: url.searchParams.get('path'),
-            redirect: url.searchParams.get('redirect'),
-          })
+          if (config.validateRedirects) {
+            const redirect = url.searchParams.get('redirect')
+            const resp = await fetch(redirectToUrl(redirect, url))
+            if (resp.status > 299) {
+              updateError = true
+              url.searchParams.set(
+                'error',
+                `Invalid URL provided or request to URL, unable to save: ${redirect}`,
+              )
+            }
+          }
+
+          if (!updateError) {
+            redirectObjs.push({
+              path: url.searchParams.get('path'),
+              redirect: url.searchParams.get('redirect'),
+            })
+          }
         }
 
-        url.search = ''
-        const updated = await Promise.all(redirectObjs.map(updateRedirect))
-        if (updated.some(u => u === false)) {
-          url.searchParams.set('error', true)
+        url.searchParams.delete('bulk')
+        url.searchParams.delete('path')
+        url.searchParams.delete('redirect')
+
+        if (!updateError) {
+          const updated = await Promise.all(redirectObjs.map(updateRedirect))
+          if (updated.some(u => u === false)) {
+            url.searchParams.set(
+              'error',
+              'Something went wrong while saving your redirects',
+            )
+          }
         }
 
         url.pathname = '/_redirects'
