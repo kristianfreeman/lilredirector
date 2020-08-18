@@ -142,7 +142,7 @@ export default ({ redirects }) => () => `
     </section>
 
     <p>
-    <code>version 0.2.1</code>
+    <code>version 0.2.2</code>
     </p>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
