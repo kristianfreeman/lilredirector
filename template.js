@@ -75,7 +75,7 @@ export default ({ redirects }) => () => `
 
     <section>
       <h2>create a redirect</h2>
-      <form action="/_redirects/update">
+      <form action="/_redirects/update" method="post">
         <div>
           <label for="path">path</label><br /><br />
           <input type="text" id="path" name="path" placeholder="/about"></input>
@@ -131,13 +131,19 @@ export default ({ redirects }) => () => `
           )
           .join('\n')}
       </table>
+      <div>
+        <a id="export" href="#" style="float: right;">export csv</a>
+      </div>
       <p>* visits are an estimate. distributed systems!</p>
       `
           : `<p>no redirects created yet!</p>`
       }
+
     </section>
 
-    <code>version 0.2.0</code>
+    <p>
+    <code>version 0.2.1</code>
+    </p>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
       redirects,
