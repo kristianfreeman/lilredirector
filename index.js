@@ -89,8 +89,9 @@ const renderHtml = page =>
     headers: { 'Content-type': 'text/html' },
   })
 
-const removeTrailingSlashesFromUrl = url =>
-  (url.pathname = url.pathname.slice(0, -1))
+const removeTrailingSlashesFromUrl = url => {
+  if (url.pathname.endsWith('/')) url.pathname = url.pathname.slice(0, -1)
+}
 
 const defaults = {
   cancelBulkAddOnError: false,
@@ -98,12 +99,8 @@ const defaults = {
   validateRedirects: true,
 }
 
-const parseBulk = bulk => {
-  const string = decodeURIComponent(bulk)
-  return CSV.parse(string)
-}
-
 export default async (event, options = {}) => {
+  const { request } = event
   const config = Object.assign(defaults, options)
   let error, response
   let url = new URL(event.request.url)
@@ -121,15 +118,19 @@ export default async (event, options = {}) => {
         break
       case '/_redirects/update':
         let updateError = false
-
-        const bulk = url.searchParams.get('bulk')
+        const formData = await request.formData()
+        const body = {}
+        for (const entry of formData.entries()) {
+          body[entry[0]] = entry[1]
+        }
+        const { bulk, path, redirect } = body
         let redirectObjs = []
         if (bulk) {
           let errors = []
-          const { data } = parseBulk(bulk)
+          const { data } = CSV.parse(bulk)
           await Promise.all(
             data.map(async ([path, redirect]) => {
-              if (!path || redirect) return
+              if (!path || !redirect) return
               if (config.validateRedirects) {
                 const fetchUrl = redirectToUrl(redirect, url)
                 const resp = await fetch(fetchUrl)
@@ -141,6 +142,15 @@ export default async (event, options = {}) => {
                   return
                 }
               }
+
+              if (config.removeTrailingSlashes && path.endsWith('/')) {
+                path = path.slice(0, -1)
+              }
+
+              if (config.removeTrailingSlashes && redirect.endsWith('/')) {
+                redirect = redirect.slice(0, -1)
+              }
+
               redirectObjs.push({
                 path,
                 redirect,
@@ -153,7 +163,6 @@ export default async (event, options = {}) => {
           }
         } else {
           if (config.validateRedirects) {
-            const redirect = url.searchParams.get('redirect')
             const resp = await fetch(redirectToUrl(redirect, url))
             if (resp.status > 299) {
               updateError = true
@@ -166,8 +175,8 @@ export default async (event, options = {}) => {
 
           if (!updateError) {
             redirectObjs.push({
-              path: url.searchParams.get('path'),
-              redirect: url.searchParams.get('redirect'),
+              path,
+              redirect,
             })
           }
         }
@@ -191,9 +200,9 @@ export default async (event, options = {}) => {
         break
       default:
         if (config.removeTrailingSlashes) removeTrailingSlashesFromUrl(url)
-        const redirect = await getRedirect(url, { event })
-        if (redirect) {
-          response = Response.redirect(redirect)
+        const foundRedirect = await getRedirect(url, { event })
+        if (foundRedirect) {
+          response = Response.redirect(foundRedirect)
         }
         break
     }
