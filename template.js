@@ -59,7 +59,7 @@ const style = `
   }
 `
 
-export default ({ redirects }) => () => `
+export default ({ baseUrl, redirects }) => () => `
 <!doctype html>
 <html>
   <head>
@@ -75,7 +75,7 @@ export default ({ redirects }) => () => `
 
     <section>
       <h2>create a redirect</h2>
-      <form action="/_redirects/update" method="post">
+      <form action="${baseUrl}/update" method="post">
         <div>
           <label for="path">path</label><br /><br />
           <input type="text" id="path" name="path" placeholder="/about"></input>
@@ -142,7 +142,7 @@ export default ({ redirects }) => () => `
     </section>
 
     <p>
-    <code>version 0.2.2</code>
+    <code>version 0.3.0</code>
     </p>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
@@ -170,7 +170,7 @@ export default ({ redirects }) => () => `
 
       const confirmDeletion = async redirectId => {
         let url = new URL(window.location)
-        url.pathname = "/_redirects/delete"
+        url.pathname = "${baseUrl}/delete"
         url.searchParams.set("path", redirectId)
         await window.fetch(url, {
           method: "DELETE"

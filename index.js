@@ -1,3 +1,4 @@
+import auth from 'basic-auth'
 import CSV from 'papaparse'
 import template from './template'
 
@@ -94,6 +95,11 @@ const removeTrailingSlashesFromUrl = url => {
 }
 
 const defaults = {
+  basicAuthentication: {
+    username: null,
+    password: null,
+  },
+  baseUrl: '/_redirects',
   cancelBulkAddOnError: false,
   removeTrailingSlashes: true,
   validateRedirects: true,
@@ -102,21 +108,47 @@ const defaults = {
 export default async (event, options = {}) => {
   const { request } = event
   const config = Object.assign(defaults, options)
+  const { basicAuthentication, baseUrl } = config
   let error, response
   let url = new URL(event.request.url)
+
+  if (url.pathname.startsWith(config.baseUrl)) {
+    if (basicAuthentication.username && basicAuthentication.password) {
+      const authHeader = request.headers.get('Authorization')
+      if (!authHeader) {
+        return {
+          error: new Response('Unauthorized', {
+            status: 401,
+            headers: {
+              'WWW-Authenticate': 'Basic realm="lilredirector"',
+            },
+          }),
+        }
+      }
+
+      const user = auth.parse(authHeader)
+      if (
+        user.name !== basicAuthentication.username ||
+        user.pass !== basicAuthentication.password
+      ) {
+        return { error: new Response('Unauthorized', { status: 403 }) }
+      }
+    }
+  }
+
   try {
     switch (url.pathname) {
-      case '/_redirects':
+      case `${baseUrl}`:
         const redirects = await gatherRedirects()
-        response = renderHtml(template({ redirects }))
+        response = renderHtml(template({ baseUrl, redirects }))
         break
-      case '/_redirects/delete':
+      case `${baseUrl}/delete`:
         await deleteRedirect({
           path: url.searchParams.get('path'),
         })
         response = new Response(null, { status: 204 })
         break
-      case '/_redirects/update':
+      case `${baseUrl}/update`:
         let updateError = false
         const formData = await request.formData()
         const body = {}
@@ -195,7 +227,7 @@ export default async (event, options = {}) => {
           }
         }
 
-        url.pathname = '/_redirects'
+        url.pathname = baseUrl
         response = Response.redirect(url)
         break
       default:

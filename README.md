@@ -55,11 +55,27 @@ async function handler(event) {
   const { response, error } = await redirector(event, {
     // configuration options can be passed as an optional object.
     // see the below documentation for examples of each:
+    //
+    // baseUrl
+    // basicAuthentication
     // cancelBulkAddOnError
     // removeTrailingSlashes
     // validateRedirects
   })
   // ...
+}
+```
+
+### changing the base url
+
+by default, lilredirector serves the UI and any associated data handlers from `/_redirects`. this can be customized by providing `baseUrl` in lilredirector's configuration:
+
+```javascript
+async function handler(event) {
+  const { response, error } = await redirector(event, {
+    baseUrl: `/mylilredirector`,
+  })
+  if (response) return response
 }
 ```
 
@@ -110,7 +126,7 @@ async function handler(event) {
 
 #### handlers
 
-lilredirector embeds itself under the `/_redirects` path. here's a list of the paths you'll be adding to your application:
+lilredirector embeds itself under the `/_redirects` path, unless specified otherwise by the `baseUrl` configuration param as defined in the previous section. here's a list of the paths you'll be adding to your application:
 
 | path                 | fn                             |
 | -------------------- | ------------------------------ |
@@ -133,6 +149,33 @@ _this feature is beta and may be prone to errors._ simple comma-separated value 
 
 ## authentication
 
-you should put this behind authentication. the supported way to do this right now is with [cloudflare access](https://teams.cloudflare.com/access/). see the below screenshot for an example config:
+you should really, really put this behind authentication!
+
+### basic authentication
+
+using the configuration object, you can enable basic auth for lilredirector and any subpaths (creating/deleting redirects):
+
+```js
+async function handler(event) {
+  const { response, error } = await redirector(event, {
+    basicAuthentication: {
+      username: USERNAME,
+      password: PASSWORD,
+    },
+  })
+  if (response) return response
+}
+```
+
+it is strongly recommended that you use `wrangler secret` to define and store your basic auth credentials, as seen above:
+
+```bash
+$ wrangler secret put USERNAME
+$ wrangler secret put PASSWORD
+```
+
+### cloudflare access
+
+you can add complex role-based auth using [cloudflare access](https://teams.cloudflare.com/access/). see the below screenshot for an example config:
 
 ![access setup](./.github/access-preview.png)
