@@ -1,18 +1,24 @@
 {
   "name": "lilredirector",
-  "version": "0.3.0",
+  "version": "0.4.1-beta.2",
   "description": "redirector engine for cloudflare workers",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write '**/*.{js,css,json,md}'"
   },
   "author": "Kristian Freeman <kristian@kristianfreeman.com>",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "typescript": "^4.0.2"
   },
   "dependencies": {
+    "@cloudflare/workers-types": "^2.0.0",
+    "@types/basic-auth": "^1.1.3",
+    "@types/papaparse": "^5.0.6",
     "basic-auth": "^2.0.1",
     "papaparse": "^5.2.0"
   }
