@@ -2,8 +2,9 @@
   "name": "lilredirector",
   "version": "0.3.0",
   "description": "redirector engine for cloudflare workers",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write '**/*.{js,css,json,md}'"
   },
@@ -13,6 +14,9 @@
     "prettier": "^1.19.1"
   },
   "dependencies": {
+    "@cloudflare/workers-types": "^2.0.0",
+    "@types/basic-auth": "^1.1.3",
+    "@types/papaparse": "^5.0.6",
     "basic-auth": "^2.0.1",
     "papaparse": "^5.2.0"
   }

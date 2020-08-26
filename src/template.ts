@@ -1,3 +1,5 @@
+import type { Redirect } from './types'
+
 const style = `
   html {
     -webkit-font-smoothing: antialiased;
@@ -59,7 +61,13 @@ const style = `
   }
 `
 
-export default ({ baseUrl, redirects }) => () => `
+export default ({
+  baseUrl,
+  redirects,
+}: {
+  baseUrl: string
+  redirects: Redirect[]
+}) => () => `
 <!doctype html>
 <html>
   <head>
@@ -117,7 +125,7 @@ export default ({ baseUrl, redirects }) => () => `
         </tr>
         ${redirects
           .map(
-            redirect => `
+            (redirect: Redirect) => `
           <tr>
             <td>${redirect.path}</td>
             <td>${redirect.redirect}</td>
