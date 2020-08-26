@@ -12,7 +12,8 @@
   "author": "Kristian Freeman <kristian@kristianfreeman.com>",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^2.0.0",
