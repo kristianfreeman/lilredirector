@@ -150,7 +150,7 @@ export default ({
     </section>
 
     <p>
-    <code>version 0.3.0</code>
+    <code>version 0.4.1</code>
     </p>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
