@@ -1,4 +1,4 @@
-# lil redirector
+![banner](./.github/banner.png)
 
 a simple redirector engine for cloudflare workers.
 

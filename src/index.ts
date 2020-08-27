@@ -64,6 +64,7 @@ const deleteRedirect = async ({ path }: { path: string }) => {
 }
 
 const redirectToUrl = (redirect: string, url: URL): URL => {
+  console.log(redirect)
   if (redirect.startsWith('/')) {
     let newUrl = new URL(url.toString())
     newUrl.pathname = redirect

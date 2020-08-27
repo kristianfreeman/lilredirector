@@ -1,66 +1,5 @@
 import type { Redirect } from './types'
 
-const style = `
-  html {
-    -webkit-font-smoothing: antialiased;
-    font-family: "Helvetica Neue", helvetica, "Apple Color Emoji", arial, sans-serif;
-    color: #1d2d35;
-    background: #fff;
-  }
-
-  body {
-    margin: 0 auto;
-    max-width: 64rem;
-  }
-
-  section {
-    margin: 2rem 0;
-    border-top: 1px solid #767676;
-  }
-
-  h1, h2 {
-    margin-top: 1em;
-    margin-bottom: 0;
-  }
-
-  table {
-    width: 100%;
-    margin: 1em 0;
-  }
-
-  div {
-    margin: 1rem 0;
-  }
-
-  label {
-    font-weight: bold;
-  }
-
-  td {
-    padding: .5rem 0;
-  }
-
-  th {
-    text-align: left;
-  }
-
-  tr > *:last-child,
-  tr > *:nth-last-child(2) {
-    text-align: right;
-  }
-
-  #flash {
-    background: #FFF5F5;
-    color: #e53e3e;
-    font-weight: 600;
-    padding: 1rem;
-  }
-
-  .error {
-    background: #FFF5F5;
-  }
-`
-
 export default ({
   baseUrl,
   redirects,
@@ -71,87 +10,169 @@ export default ({
 <!doctype html>
 <html>
   <head>
-    <title>lil redirector is tracking ${redirects.length} redirects</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" />
-    <style>${style}</style>
-  </head>
-  <body>
-    <h1>lil redirector</h1>
-    <p>helping you with ${redirects.length} redirects</p>
-
-    <p id="flash"></p>
-
-    <section>
-      <h2>create a redirect</h2>
-      <form action="${baseUrl}/update" method="post">
-        <div>
-          <label for="path">path</label><br /><br />
-          <input type="text" id="path" name="path" placeholder="/about"></input>
-          <p><small>path must be local (e.g. "/about") and should not have any trailing slashes</small></p>
-        </div>
-
-        <div>
-          <label for="redirect">redirect</label><br /><br />
-          <input type="text" id="redirect" name="redirect" placeholder="/about-us"></input>
-          <p><small>redirects can be relative (e.g. "/about-us") or absolute ("https://twitter.com/cloudflaredev")</small></p>
-        </div>
-
-        <details>
-          <summary>add multiple redirects</summary>
-          <div>
-            <label for="bulk">bulk redirects</label><br /><br />
-            <textarea cols=64 rows=8 id="bulk" name="bulk" placeholder="/twitter,https://twitter.com/signalnerve"></textarea>
-            <p><small>redirects should be in csv format, e.g. "path,redirect_url"</small></p>
-          </div>
-        </details>
-
-        <div>
-          <button type="submit">create redirect</button>
-        <div>
-      </form>
-    </section>
-
-    <section>
-      <h2>redirects</h2>
-      ${
-        redirects.length
-          ? `
-      <table>
-        <tr>
-          <th>path</th>
-          <th>redirect</th>
-          <th>visits*</th>
-          <th>actions</th>
-        </tr>
-        ${redirects
-          .map(
-            (redirect: Redirect) => `
-          <tr>
-            <td>${redirect.path}</td>
-            <td>${redirect.redirect}</td>
-            <td>${redirect.visits}</td>
-            <td>
-              <button data-target="${redirect.path}" id="edit">edit</button>
-              <button data-target="${redirect.path}" id="delete">delete</button>
-            </td>
-          </tr>
-        `,
-          )
-          .join('\n')}
-      </table>
-      <div>
-        <a id="export" href="#" style="float: right;">export csv</a>
-      </div>
-      <p>* visits are an estimate. distributed systems!</p>
-      `
-          : `<p>no redirects created yet!</p>`
+    <title>Lil Redirector</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+      .bg-gray-50 {
+        background-color: #f9fafb;
+        background-color: rgba(249,250,251,1);
       }
 
-    </section>
+      .form-input {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-color: #fff;
+        border-color: #d2d6dc;
+        border-width: 1px;
+        border-radius: .375rem;
+        padding: .5rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
 
-    <p>
-    <code>version 0.4.1</code>
-    </p>
+      .form-textarea {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-color: #fff;
+        border-color: #d2d6dc;
+        border-width: 1px;
+        border-radius: .375rem;
+        padding: .5rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <ul class="flex items-center px-4 py-2">
+      <div class="flex-1 flex items-center">
+        <img class="w-16 h-16 mr-2" src="https://raw.githubusercontent.com/signalnerve/lilredirector/master/.github/logo.png" />
+        <h1 class="text-2xl font-bold">Lil Redirector</h1>
+      </div>
+      <span><code>v0.5.0</code></span>
+    </ul>
+
+    <div class="py-6">
+      <header class="mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="mt-2 md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+              <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:leading-9 sm:truncate">
+                Redirects (${redirects.length})
+              </h2>
+            </div>
+            <div class="mt-4 flex-shrink-0 flex md:mt-0 md:ml-4">
+              <span class="shadow-sm rounded-md">
+                <button id="add_redirect_button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo focus:border-indigo-700 active:bg-indigo-700 transition duration-150 ease-in-out">
+                  + Create Redirect
+                </button>
+              </span>
+              <a class="ml-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center" id="export" href="#" class="float-right">
+                <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+                <span>Export CSV</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div class="rounded-md bg-red-100 my-4 p-4" id="flash">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm leading-5 font-medium text-red-800" id="flash_text"></h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="hidden bg-gray-50 overflow-hidden rounded-lg mb-8" id="add_redirect">
+            <form class="px-4 py-5 sm:p-6 w-1/2" action="${baseUrl}/update" method="post">
+              <div class="sm:col-span-3">
+                <label for="path" class="block font-medium leading-5 text-gray-700">Path</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                  <input id="path" name="path" class="form-input block w-full sm:text-sm sm:leading-5" placeholder="/about">
+                </div>
+                <p class="mt-2 text-gray-700" id="path-description">Path must be local (e.g. "/about") and should not have any trailing slashes</p>
+              </div>
+
+              <div class="sm:col-span-3 mt-4">
+                <label for="redirect" class="block font-medium leading-5 text-gray-700">Redirect</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                  <input id="redirect" name="redirect" class="form-input block w-full sm:text-sm sm:leading-5" placeholder="/about-us">
+                </div>
+                <p class="mt-2 text-gray-700" id="redirect-description">Redirects can be relative (e.g. "/about-us") or absolute ("https://twitter.com/cloudflaredev")</p>
+              </div>
+
+              <details class="sm:col-span-3 mt-4">
+                <summary class="text-gray-700">Add Multiple Redirects</summary>
+                <div class="mt-4">
+                  <label for="bulk" class="block font-medium leading-5 text-gray-700">Bulk Redirects</label>
+                  <div class="mt-1 relative rounded-md shadow-sm">
+                    <textarea id="bulk" name="bulk" rows="3" class="form-textarea block w-full transition duration-150 ease-in-out sm:text-sm sm:leading-5"></textarea>
+                  </div>
+                  <p class="mt-2 text-gray-700" id="bulk-description">Redirects should be in CSV format, e.g. "path,redirect_url"</p>
+                </div>
+              </details>
+
+              <div class="mt-4">
+                <button class="mr-4 inline-flex items-center px-4 py-2 border border-transparent leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition ease-in-out duration-150" type="submit">Save</button>
+                <span class="inline-flex rounded-md shadow-sm">
+                  <button id="close_form" type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150">
+                    Cancel
+                  </button>
+                </span>
+              </div>
+            </form>
+          </div>
+
+          <section>
+            ${
+              redirects.length
+                ? `
+            <table class="table-auto">
+              <thead>
+                <tr>
+                  <th class="px-4 py-2">Path</th>
+                  <th class="px-4 py-2">Redirect</th>
+                  <th class="px-4 py-2">Visits*</th>
+                  <th class="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${redirects
+                  .filter((redirect: Redirect) => !!redirect.path)
+                  .map(
+                    (redirect: Redirect) => `
+                  <tr>
+                    <td class="border px-4 py-2">${redirect.path}</td>
+                    <td class="border px-4 py-2">${redirect.redirect}</td>
+                    <td class="border px-4 py-2">${redirect.visits}</td>
+                    <td class="border px-4 py-2">
+                      <button class="hover:underline text-gray-800 font-semibold" data-target="${redirect.path}" id="edit">Edit</button>
+                      <button class="hover:underline text-red-800 font-semibold ml-4" data-target="${redirect.path}" id="delete">Delete</button>
+                    </td>
+                  </tr>
+                `,
+                  )
+                  .join('\n')}
+              </tbody>
+            </table>
+            <p class="mt-4 text-gray-800">* Visits are an estimate. Distributed systems!</p>
+            `
+                : `<p>No redirects created yet!</p>`
+            }
+          </section>
+        </div>
+      </main>
+    </div>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
       redirects,
@@ -170,7 +191,7 @@ export default ({
       const parseErrors = () => {
         const errorMsg = url.searchParams.get("error")
         if (errorMsg && errorMsg.length) {
-          flash.innerHTML = errorMsg
+          document.querySelector("#flash_text").innerText = errorMsg
           flash.hidden = false
         }
       }
@@ -228,7 +249,7 @@ export default ({
         }
 
         if (!pathInput.value.length && !redirectInput.value.length && !bulkInput.value.length) {
-          flash.innerText = "No redirects provided"
+          document.querySelector("#flash_text").innerText = "No redirects provided"
           flash.hidden = false
           valid = false
         }
@@ -239,6 +260,10 @@ export default ({
       }
 
       document.querySelector("form").addEventListener('submit', validateForm)
+
+      const toggleForm = () => document.querySelector("#add_redirect").classList.toggle("hidden")
+      document.querySelector("#add_redirect_button").addEventListener('click', toggleForm)
+      document.querySelector("#close_form").addEventListener('click', toggleForm)
     </script>
   </body>
 </html>
