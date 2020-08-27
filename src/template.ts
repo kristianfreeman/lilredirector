@@ -48,7 +48,7 @@ export default ({
   <body>
     <ul class="flex items-center px-4 py-2">
       <div class="flex-1 flex items-center">
-        <img class="w-16 h-16 mr-2" src="https://i.imgur.com/G3ROMAM.png" />
+        <img class="w-16 h-16 mr-2" src="https://raw.githubusercontent.com/signalnerve/lilredirector/master/.github/logo.png" />
         <h1 class="text-2xl font-bold">Lil Redirector</h1>
       </div>
       <span><code>v0.5.0</code></span>
