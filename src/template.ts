@@ -223,6 +223,7 @@ export default ({
 
         pathInput.value = redirect.path
         redirectInput.value = redirect.redirect
+        document.querySelector("#add_redirect").classList.remove("hidden")
       }
 
       document.querySelectorAll('button#edit').forEach(button => button.addEventListener('click', editRedirect))
