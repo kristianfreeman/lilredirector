@@ -25,7 +25,7 @@ export default ({
         <img class="w-16 h-16 mr-2" src="https://raw.githubusercontent.com/signalnerve/lilredirector/master/.github/logo.png" />
         <h1 class="text-2xl font-bold">Lil Redirector</h1>
       </div>
-      <span><code>v0.9.9</code></span>
+      <span><code>v1.0.1</code></span>
     </ul>
 
     <div class="py-6">
