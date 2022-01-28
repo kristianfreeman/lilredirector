@@ -134,9 +134,8 @@ export default ({
           </div>
 
           <section>
-            ${
-              redirects.length
-                ? `
+            ${redirects.length
+    ? `
             <table class="table-auto">
               <thead>
                 <tr>
@@ -148,9 +147,9 @@ export default ({
               </thead>
               <tbody>
                 ${redirects
-                  .filter((redirect: Redirect) => !!redirect.path)
-                  .map(
-                    (redirect: Redirect) => `
+      .filter((redirect: Redirect) => !!redirect.path)
+      .map(
+        (redirect: Redirect) => `
                   <tr>
                     <td class="border px-4 py-2">${redirect.path}</td>
                     <td class="border px-4 py-2">${redirect.redirect}</td>
@@ -161,22 +160,22 @@ export default ({
                     </td>
                   </tr>
                 `,
-                  )
-                  .join('\n')}
+      )
+      .join('\n')}
               </tbody>
             </table>
             <p class="mt-4 text-gray-800">* Visits are an estimate. Distributed systems!</p>
             `
-                : `<p>No redirects created yet!</p>`
-            }
+    : `<p>No redirects created yet!</p>`
+  }
           </section>
         </div>
       </main>
     </div>
 
     <script id="redirects_data" type="text/json">${JSON.stringify(
-      redirects,
-    )}</script>
+    redirects,
+  )}</script>
 
     <script>
       const url = new URL(document.location)
@@ -184,8 +183,25 @@ export default ({
       const pathInput = document.querySelector("input#path")
       const redirectInput = document.querySelector("input#redirect")
       const bulkInput = document.querySelector('textarea#bulk')
+      const exportButton = document.querySelector("a#export")
 
       const redirects = JSON.parse(document.querySelector("script#redirects_data").innerText)
+
+      exportButton.addEventListener("click", exportToCsv)
+
+      const exportToCsv = ({ target }) => {
+        let csvStr = ""
+        redirects.forEach(({ path, redirect }) => {
+          csvStr += [path, redirect].join(",")
+          csvStr += "\n"
+        })
+        const file = new Blob([csvStr], { type: "text/csv" })
+        const fileUrl = URL.createObjectURL(file)
+        exportButton.download = "export.csv"
+        exportButton.href = fileUrl
+        exportButton.click()
+        setTimeout(() => URL.revokeObjectURL(url), 0)
+      }
 
       flash.hidden = true
       const parseErrors = () => {
