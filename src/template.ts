@@ -17,7 +17,6 @@ export default ({
         background-color: #f9fafb;
         background-color: rgba(249,250,251,1);
       }
-
       .form-input {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -30,7 +29,6 @@ export default ({
         font-size: 1rem;
         line-height: 1.5;
       }
-
       .form-textarea {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -51,9 +49,8 @@ export default ({
         <img class="w-16 h-16 mr-2" src="https://raw.githubusercontent.com/signalnerve/lilredirector/master/.github/logo.png" />
         <h1 class="text-2xl font-bold">Lil Redirector</h1>
       </div>
-      <span><code>v0.5.1</code></span>
+      <span><code>v0.5.3</code></span>
     </ul>
-
     <div class="py-6">
       <header class="mb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,7 +74,6 @@ export default ({
           </div>
         </div>
       </header>
-
       <main>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="rounded-md bg-red-100 my-4 p-4" id="flash">
@@ -92,7 +88,6 @@ export default ({
               </div>
             </div>
           </div>
-
           <div class="hidden bg-gray-50 overflow-hidden rounded-lg mb-8" id="add_redirect">
             <form class="px-4 py-5 sm:p-6 w-1/2" action="${baseUrl}/update" method="post">
               <div class="sm:col-span-3">
@@ -102,7 +97,6 @@ export default ({
                 </div>
                 <p class="mt-2 text-gray-700" id="path-description">Path must be local (e.g. "/about") and should not have any trailing slashes</p>
               </div>
-
               <div class="sm:col-span-3 mt-4">
                 <label for="redirect" class="block font-medium leading-5 text-gray-700">Redirect</label>
                 <div class="mt-1 relative rounded-md shadow-sm">
@@ -110,7 +104,6 @@ export default ({
                 </div>
                 <p class="mt-2 text-gray-700" id="redirect-description">Redirects can be relative (e.g. "/about-us") or absolute ("https://twitter.com/cloudflaredev")</p>
               </div>
-
               <details class="sm:col-span-3 mt-4">
                 <summary class="text-gray-700">Add Multiple Redirects</summary>
                 <div class="mt-4">
@@ -121,7 +114,6 @@ export default ({
                   <p class="mt-2 text-gray-700" id="bulk-description">Redirects should be in CSV format, e.g. "path,redirect_url"</p>
                 </div>
               </details>
-
               <div class="mt-4">
                 <button class="mr-4 inline-flex items-center px-4 py-2 border border-transparent leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition ease-in-out duration-150" type="submit">Save</button>
                 <span class="inline-flex rounded-md shadow-sm">
@@ -132,10 +124,10 @@ export default ({
               </div>
             </form>
           </div>
-
           <section>
-            ${redirects.length
-    ? `
+            ${
+              redirects.length
+                ? `
             <table class="table-auto">
               <thead>
                 <tr>
@@ -147,9 +139,9 @@ export default ({
               </thead>
               <tbody>
                 ${redirects
-      .filter((redirect: Redirect) => !!redirect.path)
-      .map(
-        (redirect: Redirect) => `
+                  .filter((redirect: Redirect) => !!redirect.path)
+                  .map(
+                    (redirect: Redirect) => `
                   <tr>
                     <td class="border px-4 py-2">${redirect.path}</td>
                     <td class="border px-4 py-2">${redirect.redirect}</td>
@@ -160,22 +152,21 @@ export default ({
                     </td>
                   </tr>
                 `,
-      )
-      .join('\n')}
+                  )
+                  .join('\n')}
               </tbody>
             </table>
             <p class="mt-4 text-gray-800">* Visits are an estimate. Distributed systems!</p>
             `
-    : `<p>No redirects created yet!</p>`
-  }
+                : `<p>No redirects created yet!</p>`
+            }
           </section>
         </div>
       </main>
     </div>
-
     <script id="redirects_data" type="text/json">${JSON.stringify(
-    redirects,
-  )}</script>
+      redirect,
+    )}</script>
 
     <script>
       const url = new URL(document.location)
