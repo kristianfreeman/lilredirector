@@ -1,6 +1,6 @@
 ![banner](./.github/banner.png)
 
-A simple (but powerful!) redirect tool built with Cloudflare Workers. Deploy and manage redirects at the edge without needing to config your origin application.
+A simple (but powerful!) redirect tool built with Cloudflare Workers. Deploy and manage redirects at the edge without needing to config your origin application. [See this blog post for more info on how it works, as well as a demo video.](https://7.dev/redirect-anything-with-lilredirector/)
 
 ![demo](./.github/demo.png)
 
